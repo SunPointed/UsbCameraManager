@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager.usb;
+package com.lqy.libusbcameramanager.usb;
 
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
@@ -87,7 +87,11 @@ public class UsbCameraLinker {
             if (isTargetDevice(usbDevice)) {
                 Map<String, UsbCamera> map = mLinkedCameraMap.get(usbDevice.getProductId());
                 if (map != null && map.containsKey(usbDevice.getDeviceName())) {
-                    map.get(usbDevice.getDeviceName()).connect(usbControlBlock);
+                    UsbCamera usbCamera = map.get(usbDevice.getDeviceName());
+                    if (usbCamera != null) {
+                        usbCamera.connect(usbControlBlock);
+                        usbCamera.setUsed(true);
+                    }
                 }
             }
         }
@@ -97,7 +101,11 @@ public class UsbCameraLinker {
             if (isTargetDevice(usbDevice)) {
                 Map<String, UsbCamera> map = mLinkedCameraMap.get(usbDevice.getProductId());
                 if (map != null && map.containsKey(usbDevice.getDeviceName())) {
-                    map.get(usbDevice.getDeviceName()).disconnect();
+                    UsbCamera usbCamera = map.get(usbDevice.getDeviceName());
+                    if (usbCamera != null) {
+                        usbCamera.disconnect();
+                        usbCamera.setUsed(false);
+                    }
                 }
             }
         }
@@ -168,6 +176,7 @@ public class UsbCameraLinker {
             for (Map.Entry<String, UsbCamera> entry : linkedEntries) {
                 if (entry.getValue() != null) {
                     entry.getValue().finish();
+                    entry.getValue().setUsed(false);
                 }
             }
         }

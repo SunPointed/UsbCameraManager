@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager.record;
+package com.lqy.usb;
 
 /**
  * Created by lqy on 2018/6/13.
@@ -14,6 +14,8 @@ public interface IRecorderEngine {
     void handleAudioData(byte[] audio);
 
     void handleVideoData(byte[] video);
+
+    void handleLiveVideoData(byte[] video);
 
     void register();
 

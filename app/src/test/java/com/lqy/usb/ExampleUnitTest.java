@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager;
+package com.lqy.usb;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager.usb;
+package com.lqy.libusbcameramanager.usb;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * 前提：对于相同productId的usbCamera设备，android手机只连接一个；
+ *      android手机可以连多个不同productId的usbCamera
  * Created by lqy on 2018/7/4.
  */
 
@@ -47,6 +49,9 @@ public class UsbCameraManager {
             while (cameraIterator.hasNext()) {
                 UsbCamera usbCamera = cameraIterator.next();
                 if (usbCamera.getProductId() == productId) {
+                    if(usbCamera.isUsed()){
+                        UsbCameraLinker.getInstance().unregisterCamera(usbCamera.getProductId());
+                    }
                     cameraIterator.remove();
                     break;
                 }

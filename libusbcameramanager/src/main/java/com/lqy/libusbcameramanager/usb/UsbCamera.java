@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager.usb;
+package com.lqy.libusbcameramanager.usb;
 
 import android.view.Surface;
 
@@ -7,6 +7,7 @@ import com.serenegiant.usb.Size;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.UVCCamera;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 /**
@@ -17,7 +18,9 @@ public abstract class UsbCamera {
     protected UVCCamera mUVCCamera;
     protected USBMonitor.UsbControlBlock mUsbControlBlock;
     protected int mWidth, mHeight;
-    protected boolean isAutoAdapt;
+    protected boolean isAutoAdapt = true;
+
+    private boolean isUsed = false;
 
     public abstract int getProductId();
 
@@ -44,6 +47,14 @@ public abstract class UsbCamera {
     protected abstract void onOpenCamera();
 
     protected abstract void onCloseCamera();
+
+    public boolean isUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(boolean used) {
+        isUsed = used;
+    }
 
     public String getDeviceName() {
         return mUsbControlBlock == null ? null : mUsbControlBlock.getDeviceName();
@@ -77,7 +88,9 @@ public abstract class UsbCamera {
         mUVCCamera.open(mUsbControlBlock);
 
         try {
-            UVCCamera.class.getDeclaredField("mCurrentFrameFormat").set(mUVCCamera, getFrameFormat());
+            Field field = UVCCamera.class.getDeclaredField("mCurrentFrameFormat");
+            field.setAccessible(true);
+            field.set(mUVCCamera, getFrameFormat());
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager.usb;
+package com.lqy.libusbcameramanager.usb;
 
 import com.serenegiant.usb.IFrameCallback;
 

@@ -1,4 +1,4 @@
-package com.lqy.usbcameramanager.usb;
+package com.lqy.usb;
 
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
@@ -6,7 +6,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 
-import com.lqy.usbcameramanager.record.IRecorderEngine;
+import com.lqy.libusbcameramanager.usb.DefaultFrameRateCallback;
+import com.lqy.libusbcameramanager.usb.UsbCamera;
 import com.serenegiant.usb.IFrameCallback;
 
 import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
@@ -124,7 +125,7 @@ public class GlassUsbCamera extends UsbCamera {
                         time1 = curTime;
                     } else {
                         if (curTime - time1 >= 1000) {
-                            Log.d("guazi_jni", "fix -> " + count1);
+                            Log.d("test", "fix -> " + count1);
                             time1 = curTime;
                             count1 = 0;
                         } else {
@@ -138,7 +139,7 @@ public class GlassUsbCamera extends UsbCamera {
             @Override
             protected void doFrameWithAll(byte[] data) {
                 if (mRecorderEngine != null && mRecorderEngine.isLive()) {
-                    // TODO: 2018/7/5
+                    mRecorderEngine.handleLiveVideoData(data);
                 }
 
                 if (fpsDebug) {
@@ -147,7 +148,7 @@ public class GlassUsbCamera extends UsbCamera {
                         time2 = curTime;
                     } else {
                         if (curTime - time2 >= 1000) {
-                            Log.d("guazi_jni", "all -> " + count2);
+                            Log.d("test", "all -> " + count2);
                             time2 = curTime;
                             count2 = 0;
                         } else {

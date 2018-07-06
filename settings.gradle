@@ -1,1 +1,1 @@
-include ':app', ':libusbcamera', ':common-1.1.1'
+include ':app', ':libusbcamera', ':common-1.1.1', ':libusbcameramanager'
