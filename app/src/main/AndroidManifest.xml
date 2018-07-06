@@ -34,7 +34,17 @@
             android:launchMode="singleTop"
             android:screenOrientation="landscape" />
 
-        <service android:name="com.lqy.PreviewService"/>
+        <service android:name="com.lqy.PreviewService" />
+
+        <activity
+            android:name="com.lqy.NoViewActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name="com.lqy.NoViewService"
+            android:process=":remote" />
 
     </application>
 </manifest>

@@ -16,7 +16,7 @@ import static android.opengl.GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
  * Created by lqy on 2018/7/4.
  */
 
-public class GlassUsbCamera extends UsbCamera {
+public class NoViewUsbCamera extends UsbCamera {
 
     private SurfaceTexture mSurfaceTexture;
     private int mProductId;
@@ -35,7 +35,7 @@ public class GlassUsbCamera extends UsbCamera {
     private int count2 = 0;
     private final boolean fpsDebug = false;
 
-    GlassUsbCamera(Builder builder) {
+    NoViewUsbCamera(Builder builder) {
         mProductId = builder.mProductId;
         mProductName = builder.mProductName;
         mVendorId = builder.mVendorId;
@@ -243,7 +243,7 @@ public class GlassUsbCamera extends UsbCamera {
             return this;
         }
 
-        public GlassUsbCamera build() {
+        public NoViewUsbCamera build() {
             if (mProductId == -1) {
                 throw new IllegalStateException("productId not set");
             }
@@ -280,7 +280,7 @@ public class GlassUsbCamera extends UsbCamera {
                 throw new IllegalStateException("height not set");
             }
 
-            return new GlassUsbCamera(this);
+            return new NoViewUsbCamera(this);
         }
     }
 }

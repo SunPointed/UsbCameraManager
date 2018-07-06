@@ -19,16 +19,16 @@ public class EntryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_entry);
     }
 
-    public void toActivity(View view){
+    public void toActivity(View view) {
         startActivity(new Intent(this, PreviewActivity.class));
     }
 
-    public void toWindow(View view){
+    public void toWindow(View view) {
         startService(new Intent(this, PreviewService.class));
         finish();
     }
 
-    public void toNoView(View view){
-
+    public void toNoView(View view) {
+        startActivity(new Intent(this, NoViewActivity.class));
     }
 }
