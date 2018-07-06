@@ -81,6 +81,7 @@ public class UsbCameraManager {
     }
 
     public void finish() {
+        closeUsbCamera();
         UsbCameraLinker.getInstance().unregister();
         synchronized (fLock) {
             mCameras.clear();

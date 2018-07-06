@@ -24,7 +24,8 @@ public class EntryActivity extends AppCompatActivity {
     }
 
     public void toWindow(View view){
-
+        startService(new Intent(this, PreviewService.class));
+        finish();
     }
 
     public void toNoView(View view){

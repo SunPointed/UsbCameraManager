@@ -2,8 +2,6 @@ package com.lqy;
 
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Surface;
@@ -13,12 +11,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.lqy.libusbcameramanager.usb.DefaultFrameRateCallback;
-import com.lqy.libusbcameramanager.usb.UsbCamera;
 import com.lqy.libusbcameramanager.usb.UsbCameraManager;
+import com.lqy.usb.DefaultUsbCamera;
 import com.lqy.usb.R;
-import com.serenegiant.usb.IFrameCallback;
-import com.serenegiant.usb.UVCCamera;
 
 /**
  * Created by lqy on 2018/7/6.
@@ -29,7 +24,7 @@ public class PreviewActivity extends AppCompatActivity implements TextureView.Su
     private TextureView mTextureView;
     private Button mButton;
 
-    private PreviewUsbCamera mPreviewUsbCamera;
+    private DefaultUsbCamera mPreviewUsbCamera;
 
     private boolean isSurfaceInitial;
     private boolean isOpen;
@@ -60,7 +55,7 @@ public class PreviewActivity extends AppCompatActivity implements TextureView.Su
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        mPreviewUsbCamera = new PreviewUsbCamera(new Surface(surface));
+        mPreviewUsbCamera = new DefaultUsbCamera(new Surface(surface));
         UsbCameraManager.getInstance().registerUsbCamera(mPreviewUsbCamera);
         isSurfaceInitial = true;
     }
@@ -103,90 +98,5 @@ public class PreviewActivity extends AppCompatActivity implements TextureView.Su
                 v.setEnabled(true);
             }
         }, 2000);
-    }
-
-    static class PreviewUsbCamera extends UsbCamera {
-
-        private Surface mSurface;
-
-        public PreviewUsbCamera(Surface surface) {
-            mSurface = surface;
-            setResolution(640, 480, true);
-        }
-
-        @Override
-        public int getProductId() {
-            return 866;
-        }
-
-        @Override
-        public String getProductName() {
-            return PreviewUsbCamera.class.getSimpleName();
-        }
-
-        @Override
-        public int getVendorId() {
-            return PreviewUsbCamera.class.getSimpleName().length();
-        }
-
-        @Override
-        protected int getFrameFormat() {
-            return UVCCamera.FRAME_FORMAT_YUYV;
-        }
-
-        @Override
-        protected int getMinFps() {
-            return 1;
-        }
-
-        @Override
-        protected int getMaxFps() {
-            return 31;
-        }
-
-        @Override
-        protected Surface getSurface() {
-            return mSurface;
-        }
-
-        @Override
-        protected IFrameCallback getFrameCallback() {
-            return new DefaultFrameRateCallback() {
-                @Override
-                protected void doFrameWithFixFrameRate(byte[] data) {
-                    // TODO: 2018/7/6 处理固定帧率的流
-                }
-
-                @Override
-                protected void doFrameWithAll(byte[] data) {
-                    // TODO: 2018/7/6 处理所有帧率的流
-                }
-            };
-        }
-
-        @Override
-        protected void onConnect() {
-            openCamera();
-        }
-
-        @Override
-        protected void onDisconnect() {
-            closeCamera();
-        }
-
-        @Override
-        protected void onFinish() {
-
-        }
-
-        @Override
-        protected void onOpenCamera() {
-
-        }
-
-        @Override
-        protected void onCloseCamera() {
-
-        }
     }
 }
