@@ -5,11 +5,9 @@ package com.lqy.usb;
  */
 
 public interface IRecorderEngine {
-    void startRecording(boolean isVoiceClose, boolean isLive);
+    void startRecording();
 
-    void stopRecording(boolean needRestart);
-
-    void restartRecording();
+    void stopRecording();
 
     void handleAudioData(byte[] audio);
 
@@ -17,12 +15,7 @@ public interface IRecorderEngine {
 
     void handleLiveVideoData(byte[] video);
 
-    void register();
-
-    void unregister();
-
-    // 是否是直播
-    boolean isLive();
-
     void setSize(int width, int height);
+
+    boolean isLive();
 }

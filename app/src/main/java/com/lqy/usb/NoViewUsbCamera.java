@@ -171,12 +171,12 @@ public class NoViewUsbCamera extends UsbCamera {
 
     private void openEngine() {
         mRecorderEngine.setSize(mWidth, mHeight);
-        mRecorderEngine.startRecording(false, mRecorderEngine.isLive());
+        mRecorderEngine.startRecording();
     }
 
     private void closeEngine() {
         if (mRecorderEngine != null) {
-            mRecorderEngine.stopRecording(false);
+            mRecorderEngine.stopRecording();
 //            mRecorderEngine = null;
         }
     }
