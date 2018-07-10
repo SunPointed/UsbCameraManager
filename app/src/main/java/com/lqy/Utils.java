@@ -24,4 +24,6 @@ public class Utils {
         double statusBarHeight = Math.ceil(25 * context.getResources().getDisplayMetrics().density);
         return statusBarHeight;
     }
+
+
 }

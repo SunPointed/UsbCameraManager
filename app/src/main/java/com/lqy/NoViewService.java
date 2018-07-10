@@ -4,11 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
-import android.graphics.YuvImage;
 import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -17,18 +15,20 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.ImageView;
 
 import com.lqy.usb.R;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lqy on 2018/7/6.
@@ -41,7 +41,7 @@ public class NoViewService extends Service {
     private WindowManager mWindowManager;
 
     private View mRootView;
-    private ImageView mImageView;
+    private SurfaceView mSurfaceView;
 
     private float mWidth, mHeight;
     private float mAllWidth, mAllHeight;
@@ -51,6 +51,15 @@ public class NoViewService extends Service {
 
     private float mPx = 0f;
     private float mPy = 0f;
+
+    private SurfaceHolder mSurfaceHolder;
+    private Thread mDataThread;
+    private Thread mDrawThread;
+
+    int[] mColors = new int[640 * 480];
+    private Bitmap mBitmap = Bitmap.createBitmap(640, 480, Bitmap.Config.ARGB_8888);
+
+    private BlockingQueue<byte[]> mBytes = new LinkedBlockingQueue<>();
 
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
@@ -113,7 +122,7 @@ public class NoViewService extends Service {
         if (mWindowManager != null) {
 
             mRootView = LayoutInflater.from(this).inflate(R.layout.window_no_view, null);
-            mImageView = mRootView.findViewById(R.id.window_no_view_iv);
+            mSurfaceView = mRootView.findViewById(R.id.window_no_view_iv);
 
             DisplayMetrics displayMetrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(displayMetrics);
@@ -141,65 +150,116 @@ public class NoViewService extends Service {
 
             mRootView.setOnTouchListener(mOnTouchListener);
 
-            new Thread(new Runnable() {
+            mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
                 @Override
-                public void run() {
-                    try {
-                        ServerSocket serverSocket = new ServerSocket(8888);
-                        final Socket socket = serverSocket.accept();
-                        Log.d("lqy", "socket -> accept");
-                        if (socket != null) {
-                            BitmapFactory.Options options = new BitmapFactory.Options();
-                            options.inSampleSize = 1;
-                            while (!isStop) {
-                                InputStream is = socket.getInputStream();
-                                byte[] data = new byte[4096];
-                                int length = 0;
-                                byte[] all = new byte[0];
-                                byte[] show = null;
-                                while ((length = is.read(data)) != -1) {
-                                    if (all.length + length >= 460800) {
-                                        show = new byte[460800];
-                                        System.arraycopy(all, 0, show, 0, all.length);
-                                        System.arraycopy(data, 0, show, all.length, 460800 - all.length);
+                public void surfaceCreated(SurfaceHolder holder) {
+                    mSurfaceHolder = holder;
+                    startThread();
+                }
 
-                                        byte[] temp = new byte[all.length + length - 460800];
-                                        System.arraycopy(data, 460800 - all.length, temp, 0, temp.length);
-                                    } else {
-                                        show = null;
-                                        byte[] temp = new byte[all.length + length];
-                                        System.arraycopy(all, 0, temp, 0, all.length);
-                                        System.arraycopy(data, 0, temp, all.length, length);
-                                        all = temp;
-                                    }
-                                    if (show != null) {
-                                        // TODO: 2018/7/7 save data here， just a demo
-//                                        Log.d("lqy", "data -> ready");
-//                                        YuvImage image = new YuvImage(show, ImageFormat.NV21, 640, 480, null);
-//                                        ByteArrayOutputStream outputSteam = new ByteArrayOutputStream();
-//                                        image.compressToJpeg(new Rect(0, 0, image.getWidth(), image.getHeight()), 50, outputSteam);
-//                                        byte[] jpeg = outputSteam.toByteArray();
-//                                        final Bitmap tempBitmap = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length, options);
-//                                        Log.d("lqy", "bitmap -> ready");
-//                                        if (mImageView != null && mImageView.isAttachedToWindow()) {
-//                                            mImageView.post(new Runnable() {
-//                                                @Override
-//                                                public void run() {
-//                                                    Log.d("lqy", "image -> set");
-//                                                    mImageView.setImageBitmap(tempBitmap);
-//                                                }
-//                                            });
-//                                        }
-                                    }
-                                }
+                @Override
+                public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+                }
+
+                @Override
+                public void surfaceDestroyed(SurfaceHolder holder) {
+                    holder.getSurface().release();
+                    isStop = true;
+                }
+            });
+        }
+    }
+
+    private void startThread() {
+        mDataThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ServerSocket serverSocket = new ServerSocket(8888);
+                    final Socket socket = serverSocket.accept();
+                    Log.d("lqy", "socket -> accept");
+                    if (socket != null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inSampleSize = 1;
+                        InputStream is = socket.getInputStream();
+                        byte[] data = new byte[4096];
+                        byte[] all = new byte[0];
+                        byte[] show = null;
+                        int length = 0;
+                        while ((length = is.read(data)) != -1 && !isStop) {
+                            if (all.length + length >= 460800) {
+                                show = new byte[460800];
+                                System.arraycopy(all, 0, show, 0, all.length);
+                                System.arraycopy(data, 0, show, all.length, 460800 - all.length);
+
+                                byte[] temp = new byte[all.length + length - 460800];
+                                System.arraycopy(data, 460800 - all.length, temp, 0, temp.length);
+                                all = temp;
+                            } else {
+                                show = null;
+                                byte[] temp = new byte[all.length + length];
+                                System.arraycopy(all, 0, temp, 0, all.length);
+                                System.arraycopy(data, 0, temp, all.length, length);
+                                all = temp;
+                            }
+                            if (show != null) {
+                                mBytes.add(show);
                             }
                         }
-                    } catch (IOException e) {
-                        Log.d("lqy", "service -> IOException");
+                        socket.close();
+                    }
+                } catch (IOException e) {
+                    Log.d("lqy", "service -> IOException");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        mDrawThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean is = true;
+                while (!isStop) {
+                    byte[] data = null;
+                    try {
+                        data = mBytes.poll(15, TimeUnit.MILLISECONDS);
+                        Log.d("lqy", "service size -> " + mBytes.size());
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+
+                    if (data != null) {
+                        if (is) {
+                            is = false;
+                            long time = System.currentTimeMillis();
+                            int[] rgb = YuvToRGBUtils.NV21ToRGB(data, 640, 480);
+                            if (mSurfaceHolder != null) {
+                                Canvas canvas = mSurfaceHolder.lockCanvas();
+                                render(canvas, rgb);
+                                mSurfaceHolder.unlockCanvasAndPost(canvas);
+                            }
+                            Log.d("lqy", "show bitmap time ->" + (System.currentTimeMillis() - time));
+                        }
+                    }
                 }
-            }).start();
+            }
+        });
+
+        mDataThread.start();
+        mDrawThread.start();
+    }
+
+    private void render(Canvas canvas, int[] temp) {
+        canvas.drawColor(Color.BLACK);
+
+        if (temp != null) {
+            for (int i = 0, j = 0; i < temp.length; i += 3, j++) {
+                mColors[j] = Color.rgb(temp[i], temp[i + 1], temp[i + 2]);
+            }
+            mBitmap.setPixels(mColors, 0, 640, 0, 0, 640, 480);
+            canvas.drawBitmap(mBitmap, 0, 0, null);
         }
     }
 

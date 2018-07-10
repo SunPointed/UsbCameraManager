@@ -3,14 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/UsbCameraManager.iml" filepath="$PROJECT_DIR$/UsbCameraManager.iml" />
-      <module fileurl="file://$PROJECT_DIR$/UsbCameraManager.iml" filepath="$PROJECT_DIR$/UsbCameraManager.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/common-1.1.1/common-1.1.1.iml" filepath="$PROJECT_DIR$/common-1.1.1/common-1.1.1.iml" />
-      <module fileurl="file://$PROJECT_DIR$/common-1.1.1/common-1.1.1.iml" filepath="$PROJECT_DIR$/common-1.1.1/common-1.1.1.iml" />
       <module fileurl="file://$PROJECT_DIR$/libusbcamera/libusbcamera.iml" filepath="$PROJECT_DIR$/libusbcamera/libusbcamera.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libusbcamera/libusbcamera.iml" filepath="$PROJECT_DIR$/libusbcamera/libusbcamera.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libusbcameramanager/libusbcameramanager.iml" filepath="$PROJECT_DIR$/libusbcameramanager/libusbcameramanager.iml" />
       <module fileurl="file://$PROJECT_DIR$/libusbcameramanager/libusbcameramanager.iml" filepath="$PROJECT_DIR$/libusbcameramanager/libusbcameramanager.iml" />
     </modules>
   </component>

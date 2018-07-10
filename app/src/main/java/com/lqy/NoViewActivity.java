@@ -36,6 +36,8 @@ public class NoViewActivity extends AppCompatActivity implements View.OnClickLis
 
     private IRecorderEngine mRecorderEngine = new IRecorderEngine() {
 
+        long time;
+
         @Override
         public void startRecording() {
 
@@ -53,8 +55,14 @@ public class NoViewActivity extends AppCompatActivity implements View.OnClickLis
 
         @Override
         public void handleVideoData(byte[] video) {
-            if (mSocket != null && isOpen) {
-                mBytes.add(video);
+            long curTime = System.currentTimeMillis();
+            if (time == 0) {
+                time = curTime;
+            } else if (curTime - time >= 50) {
+                time = curTime;
+                if (mSocket != null && isOpen) {
+                    mBytes.add(video);
+                }
             }
         }
 
@@ -113,9 +121,9 @@ public class NoViewActivity extends AppCompatActivity implements View.OnClickLis
                 try {
                     mSocket = new Socket("localhost", 8888);
                     while (!isStop) {
-                        byte[] data = mBytes.poll(500, TimeUnit.MILLISECONDS);
+                        byte[] data = mBytes.poll(15, TimeUnit.MILLISECONDS);
                         if (data != null && data.length > 0) {
-                            Log.d("lqy","size -> " + mBytes.size());
+                            Log.d("lqy", "activity size -> " + mBytes.size());
                             mSocket.getOutputStream().write(data);
                         }
                     }

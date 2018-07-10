@@ -4,7 +4,7 @@
              android:layout_height="match_parent"
              android:background="@color/WHITE">
 
-    <ImageView
+    <SurfaceView
         android:id="@+id/window_no_view_iv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
